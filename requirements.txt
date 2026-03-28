@@ -1,0 +1,15 @@
+pandas
+numpy
+yfinance
+sqlalchemy
+psycopg2-binary
+python-dotenv
+jupyter
+notebook
+streamlit
+matplotlib
+plotly
+scikit-learn
+xgboost
+apache-airflow
+joblib

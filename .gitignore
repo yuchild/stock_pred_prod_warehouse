@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Secrets / env
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+
+# Data
+data/raw/*
+data/staging/*
+data/processed/*
+data/exports/*
+!data/raw/.gitkeep
+!data/staging/.gitkeep
+!data/processed/.gitkeep
+!data/exports/.gitkeep
+
+# Model artifacts
+models_artifacts/*
+!models_artifacts/.gitkeep
+
+# Airflow
+airflow/logs/*
+airflow/airflow.db
+airflow/webserver_config.py
+airflow/*.pid
+
+# Streamlit
+.streamlit/secrets.toml
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/

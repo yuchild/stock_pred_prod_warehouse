@@ -1,0 +1,5 @@
+Metadata-Version: 2.4
+Name: stock_pred_prod_warehouse
+Version: 0.1.0
+Summary: Local-first stock prediction warehouse and dashboard
+Requires-Python: >=3.11
