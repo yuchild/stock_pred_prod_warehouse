@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date
 
 import pandas as pd
 import yfinance as yf
@@ -9,18 +10,14 @@ import yfinance as yf
 @dataclass
 class PriceFetchRequest:
     symbol: str
-    period: str = "2y"
+    period: str | None = "2y"
     interval: str = "1d"
     auto_adjust: bool = False
+    start_date: date | None = None
+    end_date: date | None = None
 
 
 def _flatten_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Flatten yfinance MultiIndex columns when present.
-    Keeps the first level for standard OHLCV fields.
-    Example:
-        ('Open', 'SPY') -> 'Open'
-    """
     if isinstance(df.columns, pd.MultiIndex):
         df = df.copy()
         df.columns = [col[0] if isinstance(col, tuple) else col for col in df.columns]
@@ -28,28 +25,25 @@ def _flatten_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def fetch_ohlcv(request: PriceFetchRequest) -> pd.DataFrame:
-    """
-    Fetch OHLCV data from yfinance and return a standardized DataFrame.
+    download_kwargs = {
+        "tickers": request.symbol,
+        "interval": request.interval,
+        "auto_adjust": request.auto_adjust,
+        "progress": False,
+        "threads": False,
+    }
 
-    Output columns:
-        symbol
-        trade_date
-        open_price
-        high_price
-        low_price
-        close_price
-        adj_close_price
-        volume
-        data_source
-    """
-    df = yf.download(
-        tickers=request.symbol,
-        period=request.period,
-        interval=request.interval,
-        auto_adjust=request.auto_adjust,
-        progress=False,
-        threads=False,
-    )
+    if request.start_date is not None or request.end_date is not None:
+        download_kwargs["start"] = (
+            request.start_date.isoformat() if request.start_date is not None else None
+        )
+        download_kwargs["end"] = (
+            request.end_date.isoformat() if request.end_date is not None else None
+        )
+    else:
+        download_kwargs["period"] = request.period or "2y"
+
+    df = yf.download(**download_kwargs)
 
     if df.empty:
         return pd.DataFrame(
@@ -81,7 +75,6 @@ def fetch_ohlcv(request: PriceFetchRequest) -> pd.DataFrame:
 
     df["trade_date"] = pd.to_datetime(df[date_col]).dt.date
 
-    # Standardize expected columns
     expected_price_columns = ["Open", "High", "Low", "Close", "Volume"]
     missing = [col for col in expected_price_columns if col not in df.columns]
     if missing:
